@@ -1,0 +1,82 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: install-app    
+spec:
+  params:    
+    - name: mas_app_id
+      type: string
+      default: manage
+      description: Maximo Applicaiton Suite Application Id
+    - name: mas_instance_id
+      type: string
+    - default: ''
+      description: Maximo Application Suite Entitlement Username
+      name: mas_entitlement_key
+      type: string
+    - default: ''
+      description: Maximo Application Suite Entitlement Username
+      name: mas_entitlement_username
+      type: string
+    - default: cp.icr.io/cp
+      name: mas_icr_cp
+      type: string
+      description: Maximos Application Suite Image registry
+    - default: '8.x'
+      description: Maximo Application Suite Entitlement Username
+      name: mas_app_channel
+      type: string
+    - default: 'ibm-operator-catalog'
+      description: Maximo Application Suite Entitlement Username
+      name: mas_app_catalog_source
+      type: string
+    - name: artifactory_username
+      description: Artifactory Username for Development deployment
+      default: ''
+      type: string
+    - name: artifactory_apikey
+      description: Artifactory APIKEY for Development deployment
+      default: ''
+      type: string
+    
+  stepTemplate:
+    env:
+      - name: MAS_ENTITLEMENT_KEY
+        value: $(params.mas_entitlement_key)
+      - name: MAS_APP_ID
+        value: $(params.mas_app_id)      
+      - name: MAS_INSTANCE_ID
+        value: $(params.mas_instance_id)
+      - name: MAS_ENTITLEMENT_USERNAME
+        value: $(params.mas_entitlement_username)
+      - name: MAS_APP_CHANNEL
+        value: $(params.mas_app_channel)
+      - name: MAS_APP_CATALOG_SOURCE
+        value: $(params.mas_app_catalog_source)
+      - name: LOGDIR
+        value: /workspace/logs
+      - name: W3_USERNAME
+        value: $(params.artifactory_username)
+      - name: ARTIFACTORY_APIKEY
+        value: $(params.artifactory_apikey)
+      - name: MAS_ICR_CP
+        value: $(params.mas_icr_cp)
+
+    name: ''
+    resources: {}
+  steps:
+    - args:
+        - |-
+          echo "$(date) Installing MAS application"                      
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/lib/python3.8/site-packages/ansible_collections/ibm/mas_devops/playbooks/mas/install-app.yml          
+      command:
+        - /bin/bash
+        - '-c'
+      image: 'quay.io/ibmmas/ansible-devops:latest'
+      name: install-app
+      timeout: 2h0m0s
+      resources: {}
+      workingDir: /workspace/configs
+  workspaces:
+    - name: configs

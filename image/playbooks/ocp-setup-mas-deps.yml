@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  any_errors_fatal: true
+  vars:
+    # Which MAS config directory
+    artifactory_username: "{{ lookup('env', 'W3_USERNAME') }}"
+
+    # MAS configuration
+    artifactory_apikey: "{{ lookup('env', 'ARTIFACTORY_APIKEY') }}"
+    
+  roles:
+    - ibm.mas_devops.ocp_setup_mas_deps

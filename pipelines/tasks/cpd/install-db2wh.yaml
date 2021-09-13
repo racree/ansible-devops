@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: install-db2wh    
+spec:
+  params:
+    - default: /workspace/configs
+      description: The directory where the produced JDBC config should be saved
+      name: mas_config_dir
+      type: string
+    - name: mas_instance_id
+      type: string
+    - default: ''
+      description: Cloud Pak for Data Entitlement Key
+      name: cpd_entitlement_key
+      type: string
+  stepTemplate:
+    env:
+      - name: CPD_ENTITLEMENT_KEY
+        value: $(params.cpd_entitlement_key)
+      - name: CPD_STORAGE_CLASS
+        value: ibmc-file-gold-gid
+      - name: MAS_CONFIG_DIR
+        value: $(params.mas_config_dir)
+      - name: MAS_INSTANCE_ID
+        value: $(params.mas_instance_id)
+      - name: LOGDIR
+        value: /workspace/logs
+    name: ''
+    resources: {}
+  steps:
+    - args:
+        - |-
+          echo "$(date) Installing CP4D & Db2 ... this will take upwards of hours"                      
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/lib/python3.8/site-packages/ansible_collections/ibm/mas_devops/playbooks/cp4d/install-db2.yml          
+      command:
+        - /bin/bash
+        - '-c'
+      image: 'quay.io/ibmmas/ansible-devops:latest'
+      name: db2wh      
+      resources: {}
+      workingDir: /workspace/configs
+  workspaces:
+    - name: configs

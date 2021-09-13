@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: install-mas-deps
+spec:
+  workspaces:
+    - name: configs
+  params:
+    - name: artifactory_apikey
+      description: When provided install MAS Development Catatalog
+      type: string
+      default: ""
+    - name: artifactory_username
+      description: When provided install MAS Development Catatalog
+      type: string
+      default: ""
+  stepTemplate:
+    env:
+      - name: W3_USERNAME
+        value: $(params.artifactory_username)
+      - name: ARTIFACTORY_APIKEY
+        value: $(params.artifactory_apikey)
+      - name: LOGDIR
+        value: /workspace/logs
+  steps:
+    - name: suite-config      
+      image: quay.io/ibmmas/ansible-devops:latest
+      workingDir: /workspace/configs
+      command: ["/bin/bash", "-c"]
+      args:
+        - |-
+          echo "$(date) Configuring Suite"                           
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/src/playbooks/suite-config.yml

@@ -1,0 +1,65 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: install-mongoce
+spec:
+  params:
+    - default: /workspace/configs
+      description: The directory where the produced Kafka config should be saved
+      name: mas_config_dir
+      type: string
+    - name: mas_instance_id
+      type: string
+    - default: 'mongoce'
+      description: Namespace where MongoDb CE will be installed
+      name: mongodb_namespace
+      type: string
+    - default: 'community'
+      description: MongoDB Provider
+      name: mongodb_provider
+      type: string    
+    - default: 'ibmc-block-gold'
+      description: MongoDb Storage Class
+      name: mongodb_storage_class
+      type: string
+    - default: '20Gi'
+      description: MongoDb Storage Capacity Data
+      name: mongodb_storage_capacity_data
+      type: string
+    - default: '20Gi'
+      description: MongoDb Logs Capacity Data
+      name: mongodb_storage_capacity_logs
+      type: string
+  stepTemplate:
+    env:
+      - name: MONGODB_NAMESPACE
+        value: $(params.mongo_namespace)
+      - name: MONGODB_STORAGE_CLASS
+        value: $(params.mongodb_storage_class)
+      - name: MONGODB_STORAGE_CAPACITY_DATA
+        value: $(params.mongodb_storage_capacity_data)
+      - name: MONGODB_STORAGE_CAPACITY_LOGS
+        value: $(params.mongodb_storage_capacity_logs)      
+      - name: MAS_CONFIG_DIR
+        value: $(params.mas_config_dir)
+      - name: MAS_INSTANCE_ID
+        value: $(params.mas_instance_id)
+      - name: LOGDIR
+        value: /workspace/logs
+    name: ''
+    resources: {}
+  steps:
+    - args:
+        - |-
+          echo "$(date) Installing CP4D & Db2 ... this will take upwards of hours"                      
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/lib/python3.8/site-packages/ansible_collections/ibm/mas_devops/playbooks/dependencies/install-amqstreams.yml          
+      command:
+        - /bin/bash
+        - '-c'
+      image: 'quay.io/ibmmas/ansible-devops:latest'
+      name: db2wh      
+      resources: {}
+      workingDir: /workspace/configs
+  workspaces:
+    - name: configs

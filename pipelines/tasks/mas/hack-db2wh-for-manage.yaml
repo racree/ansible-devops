@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: hack-db2wh-for-manage
+spec:
+  steps:
+    - args:
+        - |-
+          echo "$(date) Prepare Db2Wh for Manage"                      
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/lib/python3.8/site-packages/ansible_collections/ibm/mas_devops/playbooks/mas/hack-manage-db2.yml
+      command:
+        - /bin/bash
+        - '-c'
+      image: 'quay.io/ibmmas/ansible-devops:latest'
+      name: hack-db2wh
+      
+      resources: {}
+      workingDir: /workspace/configs
+  workspaces:
+    - name: configs

@@ -1,0 +1,67 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: install-amqstreams    
+spec:
+  params:
+    - default: /workspace/configs
+      description: The directory where the produced Kafka config should be saved
+      name: mas_config_dir
+      type: string
+    - name: mas_instance_id
+      type: string
+    - default: 'amq-streams'
+      description: Namespace where Kafka will be installed
+      name: kafka_namespace
+      type: string
+    - default: 'maskafka'
+      description: Kafka Cluster Name
+      name: kafka_cluster_name
+      type: string
+    - default: 'small'
+      description: Kafka Cluster Size
+      name: kafka_cluster_size
+      type: string
+    - default: 'ibmc-block-gold'
+      description: Kafka Storage Class
+      name: kafka_storage_class
+      type: string
+    - default: 'masuser'
+      description: Kafka Cluster Size
+      name: kafka_user_name
+      type: string
+  stepTemplate:
+    env:
+      - name: KAFKA_NAMESPACE
+        value: $(params.kafka_namespace)
+      - name: KAFKA_CLUSER_NAME
+        value: $(params.kafka_cluster_name)
+      - name: KAFKA_CLUSTER_SIZE
+        value: $(params.kafka_cluster_size)
+      - name: KAFKA_STORAGE_CLASS
+        value: $(params.kafka_storage_class)
+      - name: KAFKA_USER_NAME
+        value: $(params.kafka_user_name)
+      - name: MAS_CONFIG_DIR
+        value: $(params.mas_config_dir)
+      - name: MAS_INSTANCE_ID
+        value: $(params.mas_instance_id)
+      - name: LOGDIR
+        value: /workspace/logs
+    name: ''
+    resources: {}
+  steps:
+    - args:
+        - |-
+          echo "$(date) Installing CP4D & Db2 ... this will take upwards of hours"                      
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/lib/python3.8/site-packages/ansible_collections/ibm/mas_devops/playbooks/dependencies/install-amqstreams.yml          
+      command:
+        - /bin/bash
+        - '-c'
+      image: 'quay.io/ibmmas/ansible-devops:latest'
+      name: db2wh      
+      resources: {}
+      workingDir: /workspace/configs
+  workspaces:
+    - name: configs

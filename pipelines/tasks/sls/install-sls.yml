@@ -1,0 +1,124 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: install-sls    
+spec:
+  params:
+    - default: /workspace/configs
+      description: The directory where the produced JDBC config should be saved
+      name: mas_config_dir
+      type: string
+    - name: mas_instance_id
+      type: string
+    - default: 'cp'
+      name: sls_entitlement_username
+      description: SLS entitlement user Name
+      type: string
+    - default: ''
+      description: Service License Service Entitlement Key
+      name: sls_entitlement_key
+      type: string
+    - default: 'ibmc-file-gold-gid'
+      description: Service License Service Entitlement Key
+      name: sls_storage_class
+      type: string
+    - default: 'ibm-operator-catalog'
+      description:  Catalog Source for SLS
+      name: sls_catalog_source
+      type: string
+    - default: '3.x'
+      description: SLS Channel to subscribe to
+      name: sls_channel
+      type: string
+    - default: 'ibm-sls'
+      name: sls_namespace
+      description: Namespace to install SLS
+      type: string
+    - default: 'cp.icr.io/cp'
+      name: sls_icr_cp
+      description: Define Image Registry for SLS entitled images
+      type: string
+    - default: 'icr.io/cpopen'
+      description: Define Image Registry for SLS operator
+      name: sls_icr_cpopen
+      type: string
+    - default: 'sls'
+      name: sls_instance_name
+      type: string
+      description: SLS instance Name
+    - default: ''
+      name: sls_domain
+      type: string
+      description: Custom Domain to use for SLS Route
+    - default: 'True'
+      name: sls_auth_enforce
+      type: string
+      description: SLS Auth Enforcement
+    - default: 'True'
+      name: sls_compliance_enforce
+      type: string
+      description: SLS Compliance Enforcement
+    - default: 'True'
+      name: sls_registration_open
+      type: string
+      description:  SLS Registration Open Enable
+    - default: 'mongoce'
+      name: mongodb_namespace
+      type: string
+      description: MongoDB Namespace
+    - default: '/workspaces/configs/mongo-mongoce.yml'
+      name: mongodb_cfg_file
+      type: string
+      description: Mongo configfile to configure SLS
+    
+  stepTemplate:
+    env:
+      - name: SLS_ENTITLEMENT_KEY
+        value: $(params.sls_entitlement_key)
+      - name: SLS_STORAGE_CLASS
+        value: $(params.sls_storage_class)
+      - name: SLS_CATALOG_SOURCE
+        value: $(params.sls_catalog_source)
+      - name:  SLS_CHANNEL
+        value: $(params.sls_channel)
+      - name: SLS_NAMESPACE
+        value: $(params.sls_namespace)
+      - name: SLS_ICR_CP
+        value: $(params.sls_icr_cp)
+      - name: SLS_ICR_CPOPEN
+        value: $(params.sls_icr_cpopen)
+      - name: SLS_INSTANCE_NAME
+        value: $(params.sls_instance_name)
+      - name: SLS_ENTITLEMENT_USERNAME
+        value: $(params.sls_entitlement_username)
+      - name: SLS_DOMAIN
+        value: $(params.sls_domain)
+      - name: SLS_AUTH_ENFORCE
+        value: $(params.sls_auth_enforce)
+      - name: SLS_COMPLIANCE_ENFORCE
+        value: $(params.sls_compliance_enforce)
+      - name: SLS_REGISTRATION_OPEN
+        value: $(params.sls_registration_open)
+      - name: MAS_CONFIG_DIR
+        value: $(params.mas_config_dir)
+      - name: MAS_INSTANCE_ID
+        value: $(params.mas_instance_id)
+      - name: LOGDIR
+        value: /workspace/logs
+    name: ''
+    resources: {}
+  steps:
+    - args:
+        - |-
+          echo "$(date) Installing CP4D & Db2 ... this will take upwards of hours"                      
+          source /opt/app-root/src/env.sh
+          ansible-playbook /opt/app-root/lib/python3.8/site-packages/ansible_collections/ibm/mas_devops/playbooks/cp4d/install-db2.yml          
+      command:
+        - /bin/bash
+        - '-c'
+      image: 'quay.io/ibmmas/ansible-devops:latest'
+      name: db2wh      
+      resources: {}
+      workingDir: /workspace/configs
+  workspaces:
+    - name: configs
