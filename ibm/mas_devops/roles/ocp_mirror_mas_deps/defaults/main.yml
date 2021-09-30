@@ -26,6 +26,12 @@ mirror_images:
     - host: quay.io
       user: "{{ lookup('env', 'QUAY_IO_USER') }}"
       password: "{{ lookup('env', 'QUAY_IO_ENTITLEMENT_KEY') }}"
+  - name: mongodb
+    inv: Setup
+    registries:
+    - host: quay.io
+      user: "{{ lookup('env', 'QUAY_IO_USER') }}"
+      password: "{{ lookup('env', 'QUAY_IO_ENTITLEMENT_KEY') }}"
   - name: ocs
     inv: Setup
     registries:

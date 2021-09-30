@@ -1,0 +1,26 @@
+name: mongodb
+specVersion: 1.0.0
+displayName: 
+version: 8.5.0
+appVersion: 8.5.0
+description: 
+displayDescription: 
+organization: 
+icons:
+  - mediaType: image/png
+    url: https://raw.githubusercontent.com/CloudCoreo/etcd-cluster/master/images/icon.png
+webPage: http://
+supports:
+  architectures:
+    amd64: {}
+  k8sDistros:
+    rhocp4: {}
+  managedPlatforms: {}
+catalogs:
+  ai: {}
+  operations: {}
+  tools: {}
+certifications:
+  ibmccs: {}
+classifications:
+  commercial: {}
